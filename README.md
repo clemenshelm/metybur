@@ -42,7 +42,11 @@ will connect to your Meteor app. If you want to log in at your app, pass the cre
 require 'eventmachine'
 
 EM.run do
-  meteor = Metybur.connect('http://my-meteor-app.org:80/websocket', email: 'rubyist@meteor.com', password: 'twinkle twinkle')
+  meteor = Metybur.connect(
+    'http://my-meteor-app.org:80/websocket',
+    email:    'rubyist@meteor.com',
+    password: 'twinkle twinkle'
+  )
 end
 ```
 
