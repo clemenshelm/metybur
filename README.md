@@ -1,6 +1,33 @@
 # Metybur
 
-TODO: Write a gem description
+A DDP client for Ruby to connect to Meteor apps.
+
+Metybur lets your Ruby application connect to a Meteor app. It allows you
+to subscribe to collections and to receive updates on them.
+You can also call Meteor methods from Ruby.
+
+# Connecting to a Meteor app
+
+Metybur runs in an [EventMachine](http://eventmachine.rubyforge.org/) loop.
+Therefore all our code must be wrapped in an `EM.run` block.
+
+    require 'eventmachine'
+
+    EM.run do
+      meteor = Metybur.connect('http://my-meteor-app.org:80/websocket')
+    end
+
+will connect to your Meteor app. If you want to log in at your app, pass the credentials:
+
+    require 'eventmachine'
+
+    EM.run do
+      meteor = Metybur.connect('http://my-meteor-app.org:80/websocket', email: 'rubyist@meteor.com', password: 'twinkle twinkle')
+    end
+
+You can also pass a `:username` or `:id` instead of an `:email`. These arguments correspond to those described in [the Meteor docs](http://docs.meteor.com/#/full/meteor_loginwithpassword).
+
+From now on I'll skip the `EM.run` block in code examples, but don't forget about it. Otherwise it won't work! Promise!
 
 ## Installation
 
