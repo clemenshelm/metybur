@@ -7,7 +7,23 @@ Metybur lets your Ruby application connect to a Meteor app. It allows you
 to subscribe to collections and to receive updates on them.
 You can also call Meteor methods from Ruby.
 
-# Connecting to a Meteor app
+## Installation
+
+Add this line to your application's Gemfile:
+
+    gem 'metybur'
+
+And then execute:
+
+    $ bundle
+
+Or install it yourself as:
+
+    $ gem install metybur
+
+## Usage
+
+### Connecting to a Meteor app
 
 Metybur runs in an [EventMachine](http://eventmachine.rubyforge.org/) loop.
 Therefore all our code must be wrapped in an `EM.run` block.
@@ -30,27 +46,9 @@ You can also pass a `:username` or `:id` instead of an `:email`. These arguments
 
 From now on I'll skip the `EM.run` block in code examples, but don't forget about it. Otherwise it won't work! Promise!
 
-## Installation
-
-Add this line to your application's Gemfile:
-
-    gem 'metybur'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install metybur
-
-## Usage
-
-TODO: Write usage instructions here
-
 ## Contributing
 
-1. Fork it ( https://github.com/[my-github-username]/metybur/fork )
+1. Fork it ( https://github.com/clemenshelm/metybur/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
