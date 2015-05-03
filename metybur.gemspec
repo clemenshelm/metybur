@@ -8,8 +8,12 @@ Gem::Specification.new do |spec|
   spec.version       = Metybur::VERSION
   spec.authors       = ["Clemens Helm"]
   spec.email         = ["clemens.helm@gmail.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.summary       = 'DDP client for Ruby to connect to Meteor apps.'
+  spec.description   = <<-description
+    Metybur lets your Ruby application connect to a Meteor app. It allows you
+    to subscribe to collections and to receive updates on them.
+    You can also call Meteor methods from Ruby.
+  description
   spec.homepage      = ""
   spec.license       = "MIT"
 
