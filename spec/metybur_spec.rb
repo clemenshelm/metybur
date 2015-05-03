@@ -79,4 +79,15 @@ describe Metybur do
       expect(last_message[:msg]).to eq 'connect'
     end
   end
+
+  context 'ping pong' do
+    it 'responds with pong to a ping' do
+      Metybur.connect url
+
+      websocket.receive({msg: 'ping'}.to_json)
+
+      last_message = parse(websocket.sent.last)
+      expect(last_message[:msg]).to eq 'pong'
+    end
+  end
 end
