@@ -28,19 +28,23 @@ Or install it yourself as:
 Metybur runs in an [EventMachine](http://eventmachine.rubyforge.org/) loop.
 Therefore all our code must be wrapped in an `EM.run` block.
 
-    require 'eventmachine'
+```ruby
+require 'eventmachine'
 
-    EM.run do
-      meteor = Metybur.connect('http://my-meteor-app.org:80/websocket')
-    end
+EM.run do
+  meteor = Metybur.connect('http://my-meteor-app.org:80/websocket')
+end
+```
 
 will connect to your Meteor app. If you want to log in at your app, pass the credentials:
 
-    require 'eventmachine'
+```ruby
+require 'eventmachine'
 
-    EM.run do
-      meteor = Metybur.connect('http://my-meteor-app.org:80/websocket', email: 'rubyist@meteor.com', password: 'twinkle twinkle')
-    end
+EM.run do
+  meteor = Metybur.connect('http://my-meteor-app.org:80/websocket', email: 'rubyist@meteor.com', password: 'twinkle twinkle')
+end
+```
 
 You can also pass a `:username` or `:id` instead of an `:email`. These arguments correspond to those described in [the Meteor docs](http://docs.meteor.com/#/full/meteor_loginwithpassword).
 
