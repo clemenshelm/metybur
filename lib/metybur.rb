@@ -20,7 +20,14 @@ module Metybur
     end
     websocket.on(:close) do |event|
       logger.debug "connection closed (code #{event.code}). #{event.reason}"
-      EM.stop
+      EM.stop_event_loop
+    end
+
+    websocket.on(:message) do |event|
+      message = JSON.parse(event.data, symbolize_names: true)
+      if message[:msg] == 'ping'
+        websocket.send({msg: 'pong'}.to_json)
+      end
     end
 
     connect_message = {
