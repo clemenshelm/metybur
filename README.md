@@ -1,4 +1,5 @@
 # Metybur
+[![Build Status](https://travis-ci.org/clemenshelm/metybur.svg?branch=master)](https://travis-ci.org/clemenshelm/metybur)
 
 A DDP client for Ruby to connect to Meteor apps.
 
