@@ -5,13 +5,16 @@ require 'logger'
 
 module Metybur
   CONFIG = {
-    websocket_client_class: Faye::WebSocket::Client
+    websocket_client_class: Faye::WebSocket::Client,
+    log_level: Logger::INFO,
+    log_stream: STDOUT
   }
 
   def self.connect(url, credentials = {})
     websocket = CONFIG[:websocket_client_class].new(url)
 
-    logger = Logger.new(STDOUT)
+    logger = Logger.new(CONFIG[:log_stream])
+    logger.level = CONFIG[:log_level]
     websocket.on(:open) do |event|
       logger.debug 'connection open'
     end
@@ -57,5 +60,14 @@ module Metybur
 
   def self.websocket_client_class=(klass)
     CONFIG[:websocket_client_class] = klass
+  end
+  
+  def self.log_level=(level_symbol)
+    upcase_symbol = level_symbol.to_s.upcase.to_sym
+    CONFIG[:log_level] = Logger.const_get(upcase_symbol)
+  end
+
+  def self.log_stream=(io)
+    CONFIG[:log_stream] = io
   end
 end
