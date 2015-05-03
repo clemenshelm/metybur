@@ -90,4 +90,28 @@ describe Metybur do
       expect(last_message[:msg]).to eq 'pong'
     end
   end
+
+
+  context 'logging' do
+    it "doesn't log any messages by default" do
+      output = StringIO.new
+      Metybur.log_stream = output
+      Metybur.connect url
+
+      websocket.receive({msg: 'logged_message'}.to_json)
+
+      expect(output.string).to be_empty
+    end
+
+    it 'logs a message when the log level is set to debug' do
+      output = StringIO.new
+      Metybur.log_level = :debug
+      Metybur.log_stream = output
+      Metybur.connect url
+      
+      websocket.receive({msg: 'logged_message'}.to_json)
+
+      expect(output.string).not_to be_empty
+    end
+  end
 end

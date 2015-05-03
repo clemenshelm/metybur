@@ -54,6 +54,16 @@ You can also pass a `:username` or `:id` instead of an `:email`. These arguments
 
 From now on I'll skip the `EM.run` block in code examples, but don't forget about it. Otherwise it won't work! Promise!
 
+### Logging
+
+To debug your application, you can lower the log level to see all incoming websocket messages.
+
+```ruby
+Metybur.log_level = :debug
+```
+
+Make sure to set the log level before calling `Metybur.connect`, as it won't have any effect afterwards.
+
 ## Contributing
 
 1. Fork it ( https://github.com/clemenshelm/metybur/fork )
