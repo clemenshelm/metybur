@@ -54,6 +54,25 @@ You can also pass a `:username` or `:id` instead of an `:email`. These arguments
 
 From now on I'll skip the `EM.run` block in code examples, but don't forget about it. Otherwise it won't work! Promise!
 
+### Subscribing to a Meteor record set
+
+After connecting to your Meteor app, you can subscribe to one of the published record sets:
+
+```ruby
+meteor = Metybur.connect('http://my-meteor-app.org:80/websocket')
+meteor.subscribe('my-chat-messages')
+```
+
+### Collections
+
+Once you've subscribed, you will receive all records that are already in the record set. The record set contains records from one or more collections. You can process these records as they arrive:
+
+```ruby
+@chat_messages = {}
+meteor.collection('chat-messages')
+  .on(:added) { |id, attributes| @chat_messages[id] = attributes }
+```
+
 ### Logging
 
 To debug your application, you can lower the log level to see all incoming websocket messages.

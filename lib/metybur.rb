@@ -2,6 +2,7 @@ require "metybur/version"
 require 'faye/websocket'
 require 'json'
 require 'logger'
+require_relative 'metybur/client'
 
 module Metybur
   CONFIG = {
@@ -12,6 +13,7 @@ module Metybur
 
   def self.connect(url, credentials = {})
     websocket = CONFIG[:websocket_client_class].new(url)
+    client = Metybur::Client.new(websocket)
 
     logger = Logger.new(CONFIG[:log_stream])
     logger.level = CONFIG[:log_level]
@@ -41,7 +43,7 @@ module Metybur
     websocket.send(connect_message.to_json)
 
     password = credentials.delete(:password)
-    return unless password
+    return client unless password
 
     login_message = {
       msg: 'method',
@@ -56,6 +58,8 @@ module Metybur
     }
 
     websocket.send(login_message.to_json)
+
+    client
   end
 
   def self.websocket_client_class=(klass)
