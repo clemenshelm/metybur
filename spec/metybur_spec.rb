@@ -114,4 +114,54 @@ describe Metybur do
       expect(output.string).not_to be_empty
     end
   end
+
+  context 'subscription' do
+    it 'subscribes to a published record set' do
+      record_set = FFaker::Internet.user_name
+
+      meteor = Metybur.connect url
+      meteor.subscribe(record_set)
+
+      last_message = parse(websocket.sent.last)
+      expect(last_message[:msg]).to eq 'sub'
+      expect(last_message).to have_key :id # we don't care about the value here
+      expect(last_message[:name]).to eq record_set
+    end
+  end
+
+  context 'collections' do
+    it 'gets notified when a record is added' do
+      collection = FFaker::Internet.user_name
+      callback_called = false
+
+      id = FFaker::Guid.guid
+      fields = {city: FFaker::Address.city}
+
+      meteor = Metybur.connect url
+      meteor.collection(collection)
+        .on(:added) do |added_id, added_fields|
+          callback_called = true
+          expect(added_id).to eq id
+          expect(added_fields).to eq fields
+        end
+
+      message = {
+        msg: 'added',
+        collection: collection,
+        id: id,
+        fields: fields
+      }.to_json
+      websocket.receive message
+
+      fail("Callback didn't get called.") unless callback_called
+    end
+
+    it "doesn't get notified of a ping message" do
+      meteor = Metybur.connect(url)
+      meteor.collection('my-collection')
+        .on(:added) { fail('Callback got called') }
+
+      websocket.receive({msg: 'ping'}.to_json)
+    end
+  end
 end
