@@ -7,6 +7,14 @@ Metybur lets your Ruby application connect to a Meteor app. It allows you
 to subscribe to collections and to receive updates on them.
 You can also call Meteor methods from Ruby.
 
+> ## Caution!
+> 
+> This gem is just a few days old so far and doesn't include basic features like proper error handling. Also only a subset of the DDP protocol is implemented so far. Everything described in this README should work, though.
+> 
+> I'll keep working on it constantly, so I suppose there will be a complete and stable version soon. Stay tuned!
+> 
+> Clemens
+
 ## Installation
 
 Add this line to your application's Gemfile:
