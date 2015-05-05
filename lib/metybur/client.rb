@@ -34,7 +34,8 @@ class Metybur::Client
     params.map! do |param|
       case param
       when Hash
-        param.map { |k, v| [k.to_s.camelize(:lower), v] }.to_h
+        param_array = param.map { |k, v| [k.to_s.camelize(:lower), v] }
+        Hash[param_array]
       else
         param
       end

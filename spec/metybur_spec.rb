@@ -169,8 +169,9 @@ describe Metybur do
     it 'calls a method through the call method' do
       method = %w(postChatMessage sendEmail submitOrder).sample
       params = %w(35 Vienna true).sample(2)
-      params << {emailAddress: 'myemail@example.com', myMessage: 'Alright!', userId: 'rtnilctrniae'}
-        .to_a.sample(2).to_h
+      hashParams = {emailAddress: 'myemail@example.com', myMessage: 'Alright!', userId: 'rtnilctrniae'}
+        .to_a.sample(2)
+      params << Hash[hashParams]
 
       meteor = Metybur.connect(url)
       meteor.call(method, params)
