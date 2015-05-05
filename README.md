@@ -95,7 +95,7 @@ Call meteor methods to write back data to Meteor or to trigger actions in your M
 meteor.post_chat_message('Hey there!', in_room: 'General')
 ```
 
-This is equal to this method call in Meteor:
+This corresponds to the following method call in Meteor:
 
 ```javascript
 // Javascript
@@ -108,7 +108,7 @@ If you prefer the Meteor syntax, you can also call the method like this:
 meteor.call('postChatMessage', inRoom: 'General')
 ```
 
-Note that you have to choose this syntax, if your Meteor method name collides with a Metyrub method (like `collection` or `subscribe`).
+Note that you have to choose this syntax, if your Meteor method name collides with a Metybur method (like `collection` or `subscribe`).
 
 ### Logging
 
