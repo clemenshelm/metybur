@@ -164,4 +164,45 @@ describe Metybur do
       websocket.receive({msg: 'ping'}.to_json)
     end
   end
+
+  context 'methods' do
+    it 'calls a method through the call method' do
+      method = %w(postChatMessage sendEmail submitOrder).sample
+      params = %w(35 Vienna true).sample(2)
+      hashParams = {emailAddress: 'myemail@example.com', myMessage: 'Alright!', userId: 'rtnilctrniae'}
+        .to_a.sample(2)
+      params << Hash[hashParams]
+
+      meteor = Metybur.connect(url)
+      meteor.call(method, params)
+
+      last_message = parse(websocket.sent.last)
+      expect(last_message[:msg]).to eq 'method'
+      expect(last_message[:method]).to eq method
+      expect(last_message).to have_key :id # we don't care about the value here
+      expect(last_message[:params]).to eq params
+    end
+
+    it 'calls a method called on the client directly' do
+      meteor = Metybur.connect(url)
+      meteor.activate('user', id: 'utrtrvlc')
+
+      last_message = parse(websocket.sent.last)
+      expect(last_message[:msg]).to eq 'method'
+      expect(last_message[:method]).to eq 'activate'
+      expect(last_message).to have_key :id # we don't care about the value here
+      expect(last_message[:params]).to eq ['user', {id: 'utrtrvlc'}]
+    end
+
+    it 'camel-cases methods and parameters called on the client directly' do
+      meteor = Metybur.connect(url)
+      meteor.activate_user('Hans', user_id: 'utrtrvlc', is_admin: false)
+
+      last_message = parse(websocket.sent.last)
+      expect(last_message[:msg]).to eq 'method'
+      expect(last_message[:method]).to eq 'activateUser'
+      expect(last_message).to have_key :id # we don't care about the value here
+      expect(last_message[:params]).to eq ['Hans', {userId: 'utrtrvlc', isAdmin: false}]
+    end
+  end
 end
