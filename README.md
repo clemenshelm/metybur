@@ -73,6 +73,29 @@ meteor.collection('chat-messages')
   .on(:added) { |id, attributes| @chat_messages[id] = attributes }
 ```
 
+### Methods
+
+Call meteor methods to write back data to Meteor or to trigger actions in your Meteor app.
+
+```ruby
+meteor.post_chat_message('Hey there!', in_room: 'General')
+```
+
+This is equal to this method call in Meteor:
+
+```javascript
+// Javascript
+Meteor.call('postChatMessage', { inRoom: 'General' });
+```
+
+If you prefer the Meteor syntax, you can also call the method like this:
+
+```ruby
+meteor.call('postChatMessage', inRoom: 'General')
+```
+
+Note that you have to choose this syntax, if your Meteor method name collides with a Metyrub method (like `collection` or `subscribe`).
+
 ### Logging
 
 To debug your application, you can lower the log level to see all incoming websocket messages.
