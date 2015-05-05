@@ -163,6 +163,20 @@ describe Metybur do
 
       websocket.receive({msg: 'ping'}.to_json)
     end
+  
+    it "doesn't get notified of a record from another collection" do
+      meteor = Metybur.connect(url)
+      meteor.collection('my-collection')
+        .on(:added) { fail('Callback got called') }
+
+      message = {
+        msg: 'added',
+        collection: 'another-collection',
+        id: 'xyz',
+        fields: {country: 'Belarus'}
+      }.to_json
+      websocket.receive message
+    end
   end
 
   context 'methods' do
