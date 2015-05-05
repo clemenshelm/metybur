@@ -52,6 +52,20 @@ end
 
 You can also pass a `:username` or `:id` instead of an `:email`. These arguments correspond to those described in [the Meteor docs](http://docs.meteor.com/#/full/meteor_loginwithpassword).
 
+Alternatively you can log in at a later point by calling the `login` method explicitly:
+
+```ruby
+require 'eventmachine'
+
+EM.run do
+  meteor = Metybur.connect('http://my-meteor-app.org:80/websocket')
+
+  # Do something unauthenticated...
+
+  meteor.login(user: {email: 'rubyist@meteor.com'}, password: 'twinkle twinkle'
+end
+```
+
 From now on I'll skip the `EM.run` block in code examples, but don't forget about it. Otherwise it won't work! Promise!
 
 ### Subscribing to a Meteor record set
@@ -73,7 +87,7 @@ meteor.collection('chat-messages')
   .on(:added) { |id, attributes| @chat_messages[id] = attributes }
 ```
 
-### Methods
+### Remote Procedure Calls
 
 Call meteor methods to write back data to Meteor or to trigger actions in your Meteor app.
 

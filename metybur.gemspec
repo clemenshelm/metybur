@@ -22,7 +22,8 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency "faye-websocket"
+  spec.add_runtime_dependency "faye-websocket", "~> 0.9"
+  spec.add_runtime_dependency "activesupport", ">= 2.2.1"
 
   spec.add_development_dependency "bundler", "~> 1.6"
   spec.add_development_dependency "rake"
