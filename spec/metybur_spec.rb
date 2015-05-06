@@ -10,6 +10,7 @@ describe Metybur do
 
   let(:url) { FFaker::Internet.http_url }
   let(:websocket) { WebsocketMock.instance }
+  let(:last_sent_message) { parse(websocket.sent.last) }
 
   def parse(string_data)
     JSON.parse(string_data, symbolize_names: true)
@@ -33,11 +34,10 @@ describe Metybur do
 
       Metybur.connect url, email: email, password: password
 
-      login_message = parse(websocket.sent.last)
-      expect(login_message[:msg]).to eq 'method'
-      expect(login_message).to have_key :id # we don't care about the value here
-      expect(login_message[:method]).to eq 'login'
-      expect(login_message[:params][0])
+      expect(last_sent_message[:msg]).to eq 'method'
+      expect(last_sent_message).to have_key :id # we don't care about the value here
+      expect(last_sent_message[:method]).to eq 'login'
+      expect(last_sent_message[:params][0])
         .to eq user: { email: email },
                password: password
     end
@@ -48,11 +48,10 @@ describe Metybur do
 
       Metybur.connect url, username: username, password: password
 
-      login_message = parse(websocket.sent.last)
-      expect(login_message[:msg]).to eq 'method'
-      expect(login_message).to have_key :id # we don't care about the value here
-      expect(login_message[:method]).to eq 'login'
-      expect(login_message[:params][0])
+      expect(last_sent_message[:msg]).to eq 'method'
+      expect(last_sent_message).to have_key :id # we don't care about the value here
+      expect(last_sent_message[:method]).to eq 'login'
+      expect(last_sent_message[:params][0])
         .to eq user: { username: username },
                password: password
     end
@@ -63,11 +62,10 @@ describe Metybur do
 
       Metybur.connect url, id: userid, password: password
 
-      login_message = parse(websocket.sent.last)
-      expect(login_message[:msg]).to eq 'method'
-      expect(login_message).to have_key :id # we don't care about the value here
-      expect(login_message[:method]).to eq 'login'
-      expect(login_message[:params][0])
+      expect(last_sent_message[:msg]).to eq 'method'
+      expect(last_sent_message).to have_key :id # we don't care about the value here
+      expect(last_sent_message[:method]).to eq 'login'
+      expect(last_sent_message[:params][0])
         .to eq user: { id: userid },
                password: password
     end
@@ -75,8 +73,7 @@ describe Metybur do
     it "doesn't log in without credentials" do
       Metybur.connect url
 
-      last_message = parse(websocket.sent.last)
-      expect(last_message[:msg]).to eq 'connect'
+      expect(last_sent_message[:msg]).to eq 'connect'
     end
   end
 
@@ -86,8 +83,7 @@ describe Metybur do
 
       websocket.receive({msg: 'ping'}.to_json)
 
-      last_message = parse(websocket.sent.last)
-      expect(last_message[:msg]).to eq 'pong'
+      expect(last_sent_message[:msg]).to eq 'pong'
     end
   end
 
@@ -122,10 +118,9 @@ describe Metybur do
       meteor = Metybur.connect url
       meteor.subscribe(record_set)
 
-      last_message = parse(websocket.sent.last)
-      expect(last_message[:msg]).to eq 'sub'
-      expect(last_message).to have_key :id # we don't care about the value here
-      expect(last_message[:name]).to eq record_set
+      expect(last_sent_message[:msg]).to eq 'sub'
+      expect(last_sent_message).to have_key :id # we don't care about the value here
+      expect(last_sent_message[:name]).to eq record_set
     end
   end
 
@@ -190,33 +185,30 @@ describe Metybur do
       meteor = Metybur.connect(url)
       meteor.call(method, params)
 
-      last_message = parse(websocket.sent.last)
-      expect(last_message[:msg]).to eq 'method'
-      expect(last_message[:method]).to eq method
-      expect(last_message).to have_key :id # we don't care about the value here
-      expect(last_message[:params]).to eq params
+      expect(last_sent_message[:msg]).to eq 'method'
+      expect(last_sent_message[:method]).to eq method
+      expect(last_sent_message).to have_key :id # we don't care about the value here
+      expect(last_sent_message[:params]).to eq params
     end
 
     it 'calls a method called on the client directly' do
       meteor = Metybur.connect(url)
       meteor.activate('user', id: 'utrtrvlc')
 
-      last_message = parse(websocket.sent.last)
-      expect(last_message[:msg]).to eq 'method'
-      expect(last_message[:method]).to eq 'activate'
-      expect(last_message).to have_key :id # we don't care about the value here
-      expect(last_message[:params]).to eq ['user', {id: 'utrtrvlc'}]
+      expect(last_sent_message[:msg]).to eq 'method'
+      expect(last_sent_message[:method]).to eq 'activate'
+      expect(last_sent_message).to have_key :id # we don't care about the value here
+      expect(last_sent_message[:params]).to eq ['user', {id: 'utrtrvlc'}]
     end
 
     it 'camel-cases methods and parameters called on the client directly' do
       meteor = Metybur.connect(url)
       meteor.activate_user('Hans', user_id: 'utrtrvlc', is_admin: false)
 
-      last_message = parse(websocket.sent.last)
-      expect(last_message[:msg]).to eq 'method'
-      expect(last_message[:method]).to eq 'activateUser'
-      expect(last_message).to have_key :id # we don't care about the value here
-      expect(last_message[:params]).to eq ['Hans', {userId: 'utrtrvlc', isAdmin: false}]
+      expect(last_sent_message[:msg]).to eq 'method'
+      expect(last_sent_message[:method]).to eq 'activateUser'
+      expect(last_sent_message).to have_key :id # we don't care about the value here
+      expect(last_sent_message[:params]).to eq ['Hans', {userId: 'utrtrvlc', isAdmin: false}]
     end
   end
 end
