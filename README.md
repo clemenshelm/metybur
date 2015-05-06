@@ -107,8 +107,10 @@ This corresponds to the following method call in Meteor:
 
 ```javascript
 // Javascript
-Meteor.call('postChatMessage', { inRoom: 'General' });
+Meteor.call('postChatMessage', ['Hey there!', { inRoom: 'General' }]);
 ```
+
+Methods and hash keys will be camel-cased for you, so you can stick to the Ruby naming convention.
 
 If you prefer the Meteor syntax, you can also call the method like this:
 

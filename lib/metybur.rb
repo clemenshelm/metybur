@@ -44,20 +44,7 @@ module Metybur
 
     password = credentials.delete(:password)
     return client unless password
-
-    login_message = {
-      msg: 'method',
-      id: 'abc',
-      method: 'login',
-      params: [
-        {
-          user: credentials,
-          password: password
-        }
-      ]
-    }
-
-    websocket.send(login_message.to_json)
+    client.login(user: credentials, password: password)
 
     client
   end
