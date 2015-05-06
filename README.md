@@ -34,7 +34,7 @@ Or install it yourself as:
 ### Connecting to a Meteor app
 
 Metybur runs in an [EventMachine](http://eventmachine.rubyforge.org/) loop.
-Therefore all our code must be wrapped in an `EM.run` block.
+Therefore all your code must be wrapped in an `EM.run` block.
 
 ```ruby
 require 'eventmachine'
