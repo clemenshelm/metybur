@@ -151,6 +151,35 @@ describe Metybur do
       fail("Callback didn't get called.") unless callback_called
     end
 
+    it 'gets notified when a record is changed' do
+      collection = FFaker::Internet.user_name
+      callback_called = false
+
+      id = FFaker::Guid.guid
+      fields = {city: FFaker::Address.city}
+      cleared = [FFaker::Internet.user_name.to_sym]
+
+      meteor = Metybur.connect url
+      meteor.collection(collection)
+        .on(:changed) do |changed_id, changed_fields, cleared_fields|
+          callback_called = true
+          expect(changed_id).to eq id
+          expect(changed_fields).to eq fields
+          expect(cleared_fields).to eq fields
+        end
+
+      message = {
+        msg: 'changed',
+        collection: collection,
+        id: id,
+        fields: fields,
+        cleared: cleared
+      }.to_json
+      websocket.receive message
+
+      fail("Callback didn't get called.") unless callback_called
+    end
+
     it "doesn't get notified of a ping message" do
       meteor = Metybur.connect(url)
       meteor.collection('my-collection')
