@@ -125,83 +125,88 @@ describe Metybur do
   end
 
   context 'collections' do
+    def wait_for_callback
+      callback_called = false
+      done = -> { callback_called = true }
+      yield done
+      fail("Callback didn't get called.") unless callback_called
+    end
+
     it 'gets notified when a record is added' do
       collection = FFaker::Internet.user_name
-      callback_called = false
-
       id = FFaker::Guid.guid
       fields = {city: FFaker::Address.city}
 
       meteor = Metybur.connect url
-      meteor.collection(collection)
-        .on(:added) do |added_id, added_fields|
-          callback_called = true
-          expect(added_id).to eq id
-          expect(added_fields).to eq fields
-        end
 
-      message = {
-        msg: 'added',
-        collection: collection,
-        id: id,
-        fields: fields
-      }.to_json
-      websocket.receive message
+      wait_for_callback do |done|
+        meteor.collection(collection)
+          .on(:added) do |added_id, added_fields|
+            done.call()
+            expect(added_id).to eq id
+            expect(added_fields).to eq fields
+          end
 
-      fail("Callback didn't get called.") unless callback_called
+        message = {
+          msg: 'added',
+          collection: collection,
+          id: id,
+          fields: fields
+        }.to_json
+        websocket.receive message
+      end
     end
 
     it 'gets notified when a record is changed' do
       collection = FFaker::Internet.user_name
-      callback_called = false
-
       id = FFaker::Guid.guid
       fields = {city: FFaker::Address.city}
       cleared = [FFaker::Guid.guid]
 
       meteor = Metybur.connect url
-      meteor.collection(collection)
-        .on(:changed) do |changed_id, changed_fields, cleared_fields|
-          callback_called = true
-          expect(changed_id).to eq id
-          expect(changed_fields).to eq fields
-          expect(cleared_fields).to eq cleared
-        end
 
-      message = {
-        msg: 'changed',
-        collection: collection,
-        id: id,
-        fields: fields,
-        cleared: cleared
-      }.to_json
-      websocket.receive message
+      wait_for_callback do |done|
+        meteor.collection(collection)
+          .on(:changed) do |changed_id, changed_fields, cleared_fields|
+            done.call()
+            expect(changed_id).to eq id
+            expect(changed_fields).to eq fields
+            expect(cleared_fields).to eq cleared
+          end
 
-      fail("Callback didn't get called.") unless callback_called
+        message = {
+          msg: 'changed',
+          collection: collection,
+          id: id,
+          fields: fields,
+          cleared: cleared
+        }.to_json
+        websocket.receive message
+      end
     end
 
     it 'gets notified when a record is removed' do
       collection = FFaker::Internet.user_name
-      callback_called = false
-
       id = FFaker::Guid.guid
 
       meteor = Metybur.connect url
-      meteor.collection(collection)
-        .on(:removed) do |removed_id|
-          callback_called = true
-          expect(removed_id).to eq id
-        end
 
-      message = {
-        msg: 'removed',
-        collection: collection,
-        id: id
-      }.to_json
-      websocket.receive message
+      wait_for_callback do |done|
+        meteor.collection(collection)
+          .on(:removed) do |removed_id|
+            done.call()
+            expect(removed_id).to eq id
+          end
 
-      fail("Callback didn't get called.") unless callback_called
+        message = {
+          msg: 'removed',
+          collection: collection,
+          id: id
+        }.to_json
+        websocket.receive message
+      end
     end
+
     it "doesn't get notified of a ping message" do
       meteor = Metybur.connect(url)
       meteor.collection('my-collection')
