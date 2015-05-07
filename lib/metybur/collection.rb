@@ -1,5 +1,7 @@
 class Metybur::Collection
   def initialize(collection_name, websocket)
+    @callbacks = {}
+
     websocket.on(:message) do |event|
       attributes = JSON.parse(event.data, symbolize_names: true)
       handle_message(attributes) if attributes[:collection] == collection_name
@@ -7,23 +9,14 @@ class Metybur::Collection
   end
 
   def on(event, &block)
-    case event
-    when :added then @added_callback = block
-    when :changed then @changed_callback = block
-    when :removed then @removed_callback = block
-    end
+    @callbacks[event] = block
   end
 
   private
 
   def handle_message(attributes)
-    case attributes[:msg]
-    when 'added'
-      @added_callback.call(attributes[:id], attributes[:fields])
-    when 'changed'
-      @changed_callback.call(attributes[:id], attributes[:fields], attributes[:cleared].map(&:to_sym))
-    when 'removed'
-      @removed_callback.call(attributes[:id])
-    end
+    event = attributes[:msg].to_sym
+    arguments = attributes.slice(:id, :fields, :cleared).values
+    @callbacks[event].call(*arguments)
   end
 end

@@ -157,7 +157,7 @@ describe Metybur do
 
       id = FFaker::Guid.guid
       fields = {city: FFaker::Address.city}
-      cleared = [FFaker::Internet.user_name.to_sym]
+      cleared = [FFaker::Guid.guid]
 
       meteor = Metybur.connect url
       meteor.collection(collection)
