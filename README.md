@@ -93,6 +93,12 @@ Once you've subscribed, you will receive all records that are already in the rec
 @chat_messages = {}
 meteor.collection('chat-messages')
   .on(:added) { |id, attributes| @chat_messages[id] = attributes }
+  .on(:changed) { |id, attributes, cleared|
+    chat_message = @chat_messages[id]
+    chat_message.merge!(attributes)
+    cleared.each { |field| chat_message.delete(field) }
+  }
+  .on(:removed) { |id| @chat_messages.delete(id) }
 ```
 
 ### Remote Procedure Calls
