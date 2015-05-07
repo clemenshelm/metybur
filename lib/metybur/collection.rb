@@ -10,6 +10,7 @@ class Metybur::Collection
     case event
     when :added then @added_callback = block
     when :changed then @changed_callback = block
+    when :removed then @removed_callback = block
     end
   end
 
@@ -20,7 +21,9 @@ class Metybur::Collection
     when 'added'
       @added_callback.call(attributes[:id], attributes[:fields])
     when 'changed'
-      @changed_callback.call(attributes[:id], attributes[:fields], attributes[:fields])
+      @changed_callback.call(attributes[:id], attributes[:fields], attributes[:cleared].map(&:to_sym))
+    when 'removed'
+      @removed_callback.call(attributes[:id])
     end
   end
 end

@@ -165,7 +165,7 @@ describe Metybur do
           callback_called = true
           expect(changed_id).to eq id
           expect(changed_fields).to eq fields
-          expect(cleared_fields).to eq fields
+          expect(cleared_fields).to eq cleared
         end
 
       message = {
@@ -180,6 +180,28 @@ describe Metybur do
       fail("Callback didn't get called.") unless callback_called
     end
 
+    it 'gets notified when a record is removed' do
+      collection = FFaker::Internet.user_name
+      callback_called = false
+
+      id = FFaker::Guid.guid
+
+      meteor = Metybur.connect url
+      meteor.collection(collection)
+        .on(:removed) do |removed_id|
+          callback_called = true
+          expect(removed_id).to eq id
+        end
+
+      message = {
+        msg: 'removed',
+        collection: collection,
+        id: id
+      }.to_json
+      websocket.receive message
+
+      fail("Callback didn't get called.") unless callback_called
+    end
     it "doesn't get notified of a ping message" do
       meteor = Metybur.connect(url)
       meteor.collection('my-collection')
