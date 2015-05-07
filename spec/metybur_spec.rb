@@ -207,6 +207,16 @@ describe Metybur do
       end
     end
 
+    it 'lets the `on` method be chainable' do
+      meteor = Metybur.connect(url)
+      meteor.collection('my-collection')
+        .on(:added) { anything }
+        .on(:changed) { anything }
+        .on(:removed) { anything }
+
+      # Succeeds if there is no error
+    end
+
     it "doesn't get notified of a ping message" do
       meteor = Metybur.connect(url)
       meteor.collection('my-collection')

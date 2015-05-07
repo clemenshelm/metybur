@@ -10,6 +10,7 @@ class Metybur::Collection
 
   def on(event, &block)
     @callbacks[event] = block
+    self
   end
 
   private
