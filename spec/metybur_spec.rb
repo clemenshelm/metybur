@@ -125,7 +125,8 @@ describe Metybur do
   end
 
   context 'collections' do
-    def wait_for_callback(calls: 1)
+    def wait_for_callback(options = {})
+      calls = options[:calls] || 1 # No keyword arguments in Ruby 1.9.3
       times_called = 0
       done = -> { times_called += 1 }
       yield done
