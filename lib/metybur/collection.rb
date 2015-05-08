@@ -9,7 +9,8 @@ class Metybur::Collection
   end
 
   def on(event, &block)
-    @callbacks[event] = block
+    @callbacks[event] ||= []
+    @callbacks[event] << block
     self
   end
 
@@ -18,6 +19,6 @@ class Metybur::Collection
   def handle_message(attributes)
     event = attributes[:msg].to_sym
     arguments = attributes.slice(:id, :fields, :cleared).values
-    @callbacks[event].call(*arguments)
+    @callbacks[event].each { |callback| callback.call(*arguments) }
   end
 end

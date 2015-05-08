@@ -125,11 +125,11 @@ describe Metybur do
   end
 
   context 'collections' do
-    def wait_for_callback
-      callback_called = false
-      done = -> { callback_called = true }
+    def wait_for_callback(calls: 1)
+      times_called = 0
+      done = -> { times_called += 1 }
       yield done
-      fail("Callback didn't get called.") unless callback_called
+      fail("Callback only got called #{times_called} time(s).") if times_called < calls
     end
 
     it 'gets notified when a record is added' do
@@ -215,6 +215,28 @@ describe Metybur do
         .on(:removed) { anything }
 
       # Succeeds if there is no error
+    end
+
+    it 'registers multiple added callbacks' do
+      collection = FFaker::Internet.user_name
+      id = FFaker::Guid.guid
+      fields = {city: FFaker::Address.city}
+
+      meteor = Metybur.connect url
+
+      wait_for_callback(calls: 2) do |done|
+        meteor.collection(collection)
+          .on(:added) { |added_id, added_fields| done.call() }
+          .on(:added) { |added_id, added_fields| done.call() }
+
+        message = {
+          msg: 'added',
+          collection: collection,
+          id: id,
+          fields: fields
+        }.to_json
+        websocket.receive message
+      end
     end
 
     it "doesn't get notified of a ping message" do
