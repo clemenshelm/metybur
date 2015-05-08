@@ -101,6 +101,17 @@ meteor.collection('chat-messages')
   .on(:removed) { |id| @chat_messages.delete(id) }
 ```
 
+You can also assign multiple callbacks to one event:
+
+```ruby
+@chat_messages = {}
+collection = meteor.collection('chat-messages')
+
+collection.on(:added) { |id, attributes| @chat_messages[id] = attributes }
+
+collection.on(:added) { |id, attributes| puts "received message #{attributes.text}" }
+```
+
 ### Remote Procedure Calls
 
 Call meteor methods to write back data to Meteor or to trigger actions in your Meteor app.
