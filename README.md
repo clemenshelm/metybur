@@ -109,7 +109,7 @@ collection = meteor.collection('chat-messages')
 
 collection.on(:added) { |id, attributes| @chat_messages[id] = attributes }
 
-collection.on(:added) { |id, attributes| puts "received message #{attributes.text}" }
+collection.on(:added) { |id, attributes| puts "received message #{attributes[:text]}" }
 ```
 
 ### Remote Procedure Calls
