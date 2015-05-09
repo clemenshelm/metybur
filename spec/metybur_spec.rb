@@ -17,7 +17,7 @@ describe Metybur do
   end
 
   it 'connects to a Meteor URL' do
-    Metybur.connect url
+    Metybur.connect(url)
 
     expect(websocket.url).to eq url
     connect_message = parse(websocket.sent.first)
@@ -32,7 +32,7 @@ describe Metybur do
       email = FFaker::Internet.email
       password = FFaker::Internet.password
 
-      Metybur.connect url, email: email, password: password
+      Metybur.connect(url, email: email, password: password)
 
       expect(last_sent_message[:msg]).to eq 'method'
       expect(last_sent_message).to have_key :id # we don't care about the value here
@@ -46,7 +46,7 @@ describe Metybur do
       username = FFaker::Internet.user_name
       password = FFaker::Internet.password
 
-      Metybur.connect url, username: username, password: password
+      Metybur.connect(url, username: username, password: password)
 
       expect(last_sent_message[:msg]).to eq 'method'
       expect(last_sent_message).to have_key :id # we don't care about the value here
@@ -60,7 +60,7 @@ describe Metybur do
       userid = FFaker::Guid.guid
       password = FFaker::Internet.password
 
-      Metybur.connect url, id: userid, password: password
+      Metybur.connect(url, id: userid, password: password)
 
       expect(last_sent_message[:msg]).to eq 'method'
       expect(last_sent_message).to have_key :id # we don't care about the value here
@@ -71,7 +71,7 @@ describe Metybur do
     end
 
     it "doesn't log in without credentials" do
-      Metybur.connect url
+      Metybur.connect(url)
 
       expect(last_sent_message[:msg]).to eq 'connect'
     end
@@ -79,7 +79,7 @@ describe Metybur do
 
   context 'ping pong' do
     it 'responds with pong to a ping' do
-      Metybur.connect url
+      Metybur.connect(url)
 
       websocket.receive({msg: 'ping'}.to_json)
 
@@ -92,7 +92,7 @@ describe Metybur do
     it "doesn't log any messages by default" do
       output = StringIO.new
       Metybur.log_stream = output
-      Metybur.connect url
+      Metybur.connect(url)
 
       websocket.receive({msg: 'logged_message'}.to_json)
 
@@ -103,7 +103,7 @@ describe Metybur do
       output = StringIO.new
       Metybur.log_level = :debug
       Metybur.log_stream = output
-      Metybur.connect url
+      Metybur.connect(url)
       
       websocket.receive({msg: 'logged_message'}.to_json)
 
@@ -115,7 +115,7 @@ describe Metybur do
     it 'subscribes to a published record set' do
       record_set = FFaker::Internet.user_name
 
-      meteor = Metybur.connect url
+      meteor = Metybur.connect(url)
       meteor.subscribe(record_set)
 
       expect(last_sent_message[:msg]).to eq 'sub'
@@ -138,7 +138,7 @@ describe Metybur do
       id = FFaker::Guid.guid
       fields = {city: FFaker::Address.city}
 
-      meteor = Metybur.connect url
+      meteor = Metybur.connect(url)
 
       wait_for_callback do |done|
         meteor.collection(collection)
@@ -164,7 +164,7 @@ describe Metybur do
       fields = {city: FFaker::Address.city}
       cleared = [FFaker::Guid.guid]
 
-      meteor = Metybur.connect url
+      meteor = Metybur.connect(url)
 
       wait_for_callback do |done|
         meteor.collection(collection)
@@ -190,7 +190,7 @@ describe Metybur do
       collection = FFaker::Internet.user_name
       id = FFaker::Guid.guid
 
-      meteor = Metybur.connect url
+      meteor = Metybur.connect(url)
 
       wait_for_callback do |done|
         meteor.collection(collection)
@@ -223,7 +223,7 @@ describe Metybur do
       id = FFaker::Guid.guid
       fields = {city: FFaker::Address.city}
 
-      meteor = Metybur.connect url
+      meteor = Metybur.connect(url)
 
       wait_for_callback(calls: 2) do |done|
         meteor.collection(collection)
