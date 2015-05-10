@@ -31,7 +31,9 @@ module Metybur
     websocket.on(:message) do |event|
       message = JSON.parse(event.data, symbolize_names: true)
       if message[:msg] == 'ping'
-        websocket.send({msg: 'pong'}.to_json)
+        pong = {msg: 'pong'}
+        pong[:id] = message[:id] if message[:id]
+        websocket.send(pong.to_json)
       end
     end
 

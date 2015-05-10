@@ -85,6 +85,24 @@ describe Metybur do
 
       expect(last_sent_message[:msg]).to eq 'pong'
     end
+
+    it 'includes the same id in the pong message' do
+      id = FFaker::Guid.guid
+      Metybur.connect(url)
+
+      websocket.receive({msg: 'ping', id: id}.to_json)
+
+      expect(last_sent_message[:msg]).to eq 'pong'
+      expect(last_sent_message[:id]).to eq id
+    end
+
+    it "doesn't include an id if the ping message contained none" do
+      Metybur.connect(url)
+
+      websocket.receive({msg: 'ping'}.to_json)
+
+      expect(last_sent_message).not_to have_key :id
+    end
   end
 
 
