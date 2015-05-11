@@ -105,7 +105,6 @@ describe Metybur do
     end
   end
 
-
   context 'logging' do
     it "doesn't log any messages by default" do
       output = StringIO.new
