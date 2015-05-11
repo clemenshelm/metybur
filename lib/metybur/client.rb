@@ -1,5 +1,6 @@
 require 'active_support/inflector'
 require_relative 'collection'
+require_relative 'method'
 
 class Metybur::Client
   def initialize(websocket)
@@ -19,17 +20,15 @@ class Metybur::Client
     Metybur::Collection.new(name, @websocket)
   end
 
-  def call(method, params)
-    message = {
-      msg: 'method',
-      id: 'efg',
-      method: method,
-      params: params
-    }.to_json
-    @websocket.send message
+  def method(name)
+    Metybur::Method.new(name, @websocket)
   end
 
-  def method_missing(method, *params)
+  def call(method_name, params, &block)
+    method(method_name).call(params, &block)
+  end
+
+  def method_missing(method, *params, &block)
     method = method.to_s.camelize(:lower)
     params.map! do |param|
       case param
@@ -40,6 +39,6 @@ class Metybur::Client
         param
       end
     end
-    call(method, params)
+    call(method, params, &block)
   end
 end

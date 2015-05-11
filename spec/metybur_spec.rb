@@ -16,6 +16,14 @@ describe Metybur do
     JSON.parse(string_data, symbolize_names: true)
   end
 
+  def wait_for_callback(options = {})
+    calls = options[:calls] || 1 # No keyword arguments in Ruby 1.9.3
+    times_called = 0
+    done = -> { times_called += 1 }
+    yield done
+    fail("Callback only got called #{times_called} time(s).") if times_called < calls
+  end
+
   it 'connects to a Meteor URL' do
     Metybur.connect(url)
 
@@ -142,14 +150,6 @@ describe Metybur do
   end
 
   context 'collections' do
-    def wait_for_callback(options = {})
-      calls = options[:calls] || 1 # No keyword arguments in Ruby 1.9.3
-      times_called = 0
-      done = -> { times_called += 1 }
-      yield done
-      fail("Callback only got called #{times_called} time(s).") if times_called < calls
-    end
-
     it 'gets notified when a record is added' do
       collection = FFaker::Internet.user_name
       id = FFaker::Guid.guid
@@ -315,6 +315,57 @@ describe Metybur do
       expect(last_sent_message[:method]).to eq 'activateUser'
       expect(last_sent_message).to have_key :id # we don't care about the value here
       expect(last_sent_message[:params]).to eq ['Hans', {userId: 'utrtrvlc', isAdmin: false}]
+    end
+
+    it 'passes the result to a block' do
+      meteor = Metybur.connect(url)
+
+      wait_for_callback do |done|
+        meteor.get_product(27) do |product|
+          done.call
+          expect(product[:price]).to eq 99
+        end
+
+        id = last_sent_message[:id]
+        websocket.receive({
+          msg: 'result',
+          id: id,
+          result: {price: 99}
+        }.to_json)
+      end
+    end
+
+    it "doesn't trigger the callback for ping messages" do
+      meteor = Metybur.connect(url)
+
+      meteor.get_product(27) do |product|
+        fail
+      end
+
+      websocket.receive({msg: 'ping'}.to_json)
+    end
+
+    it 'triggers the callback with the right result' do
+      meteor = Metybur.connect(url)
+
+      wait_for_callback do |done|
+        meteor.get_product(27) do |product|
+          done.call
+          expect(product[:price]).to eq 99
+        end
+
+        id = last_sent_message[:id]
+        websocket.receive({
+          msg: 'result',
+          id: 'abc',
+          result: {price: 19}
+        }.to_json)
+        websocket.receive({
+          msg: 'result',
+          id: id,
+          result: {price: 99}
+        }.to_json)
+      end
     end
   end
 end
