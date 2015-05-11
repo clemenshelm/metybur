@@ -137,6 +137,22 @@ meteor.call('postChatMessage', inRoom: 'General')
 
 Note that you have to choose this syntax, if your Meteor method name collides with a Metybur method (like `collection` or `subscribe`).
 
+Since methods are executed asynchronously, they won't return a result immediately:
+
+```ruby
+# Doesn't work!
+messages = meteor.chat_messages(in_room: 'General')
+messages.each { |message| puts message }
+```
+
+Instead, pass a block to the method which gets called once the result arrives.
+
+```ruby
+meteor.chat_messages(in_room: 'General') do |messages|
+  messages.each { |message| puts message }
+end
+```
+
 ### Logging
 
 To debug your application, you can lower the log level to see all incoming websocket messages.
