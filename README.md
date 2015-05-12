@@ -155,6 +155,32 @@ meteor.chat_messages(in_room: 'General') do
 end
 ```
 
+#### Errors
+
+Your meteor methods might throw errors, or the method you call might not even exist. You can rescue these errors right in the method's result block:
+
+```ruby
+meteor.chat_messages(in_room: 'General') do
+  begin
+    result.each { |message| puts message }
+  rescue Metybur::MethodError => e
+    puts "An error ocurred: #{e}"
+  end
+end
+```
+
+Note that the error is raised by the `result`. If your method doesn't return a result, you can still handle the error:
+
+```ruby
+meteor.post_chat_message('Hey there!', in_room: 'General') do
+  begin
+    raise_errors
+  rescue Metybur::MethodError => e
+    puts "An error ocurred: #{e}"
+  end
+end
+```
+
 ### Logging
 
 To debug your application, you can lower the log level to see all incoming websocket messages.
