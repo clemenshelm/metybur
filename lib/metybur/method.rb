@@ -1,4 +1,30 @@
+Metybur::MethodError = Class.new(Exception)
+
 class Metybur::Method
+  class Result
+    def initialize(attributes, callback)
+      @attributes = attributes
+      @callback = callback
+    end
+
+    def publish
+      instance_eval(&@callback) if @callback
+    end
+
+    def result
+      error = @attributes[:error]
+      if error
+        fail(
+          Metybur::MethodError,
+          "error: #{error[:error]}, reason: #{error[:reason]}, details: #{error[:details]}"
+        )
+      else
+        @attributes[:result]
+      end
+    end
+    alias_method :raise_errors, :result
+  end
+
   def initialize(name, websocket)
     require 'securerandom'
 
@@ -28,6 +54,7 @@ class Metybur::Method
 
   def handle_message(attributes)
     id = attributes[:id]
-    @callbacks[id].call attributes[:result] if @callbacks[id]
+    result = Result.new(attributes, @callbacks[id])
+    result.publish
   end
 end

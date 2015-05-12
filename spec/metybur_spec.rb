@@ -319,11 +319,12 @@ describe Metybur do
 
     it 'passes the result to a block' do
       meteor = Metybur.connect(url)
+      expectation = -> (result) { expect(result[:price]).to eq 99 }
 
       wait_for_callback do |done|
-        meteor.get_product(27) do |product|
+        meteor.get_product(27) do
           done.call
-          expect(product[:price]).to eq 99
+          expectation.call(result)
         end
 
         id = last_sent_message[:id]
@@ -338,7 +339,7 @@ describe Metybur do
     it "doesn't trigger the callback for ping messages" do
       meteor = Metybur.connect(url)
 
-      meteor.get_product(27) do |product|
+      meteor.get_product(27) do
         fail
       end
 
@@ -347,11 +348,12 @@ describe Metybur do
 
     it 'triggers the callback with the right result' do
       meteor = Metybur.connect(url)
+      expectation = -> (result) { expect(result[:price]).to eq 99 }
 
       wait_for_callback do |done|
-        meteor.get_product(27) do |product|
+        meteor.get_product(27) do
           done.call
-          expect(product[:price]).to eq 99
+          expectation.call(result)
         end
 
         id = last_sent_message[:id]
@@ -364,6 +366,68 @@ describe Metybur do
           msg: 'result',
           id: id,
           result: {price: 99}
+        }.to_json)
+      end
+    end
+
+    it 'raises an error if an exception occurs in the method' do
+      meteor = Metybur.connect(url)
+      error = FFaker::Lorem.word
+      reason = FFaker::Lorem.sentence
+      details = FFaker::Lorem.paragraph
+      expectation = -> (e) { expect(e.message).to eq "error: #{error}, reason: #{reason}, details: #{details}" }
+
+      wait_for_callback do |done|
+        meteor.get_product(27) do
+          begin
+            done.call
+            result
+            fail("result didn't trigger error")
+          rescue Metybur::MethodError => e
+            expectation.call(e)
+          end
+        end
+
+        id = last_sent_message[:id]
+        websocket.receive({
+          msg: 'result',
+          id: id,
+          error: {
+            error: error,
+            reason: reason,
+            details: details
+          }
+        }.to_json)
+      end
+    end
+
+    it 'raises an error if an exception occurs in the method' do
+      meteor = Metybur.connect(url)
+      error = FFaker::Lorem.word
+      reason = FFaker::Lorem.sentence
+      details = FFaker::Lorem.paragraph
+      expectation = -> (e) { expect(e.message).to eq "error: #{error}, reason: #{reason}, details: #{details}" }
+
+      wait_for_callback do |done|
+        meteor.get_product(27) do
+          begin
+            done.call
+            raise_errors
+            fail("result didn't trigger error")
+          rescue Metybur::MethodError => e
+            expectation.call(e)
+          end
+        end
+
+        id = last_sent_message[:id]
+        websocket.receive({
+          msg: 'result',
+          id: id,
+          error: {
+            error: error,
+            reason: reason,
+            details: details
+          }
         }.to_json)
       end
     end
