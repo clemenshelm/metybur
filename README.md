@@ -150,8 +150,8 @@ messages.each { |message| puts message }
 Instead, pass a block to the method. The block will get called once the result arrives.
 
 ```ruby
-meteor.chat_messages(in_room: 'General') do |messages|
-  messages.each { |message| puts message }
+meteor.chat_messages(in_room: 'General') do
+  result.each { |message| puts message }
 end
 ```
 
