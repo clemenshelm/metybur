@@ -319,7 +319,7 @@ describe Metybur do
 
     it 'passes the result to a block' do
       meteor = Metybur.connect(url)
-      expectation = -> (result) { expect(result[:price]).to eq 99 }
+      expectation = proc { |result| expect(result[:price]).to eq 99 }
 
       wait_for_callback do |done|
         meteor.get_product(27) do
@@ -348,7 +348,7 @@ describe Metybur do
 
     it 'triggers the callback with the right result' do
       meteor = Metybur.connect(url)
-      expectation = -> (result) { expect(result[:price]).to eq 99 }
+      expectation = proc { |result| expect(result[:price]).to eq 99 }
 
       wait_for_callback do |done|
         meteor.get_product(27) do
@@ -375,7 +375,7 @@ describe Metybur do
       error = FFaker::Lorem.word
       reason = FFaker::Lorem.sentence
       details = FFaker::Lorem.paragraph
-      expectation = -> (e) { expect(e.message).to eq "error: #{error}, reason: #{reason}, details: #{details}" }
+      expectation = proc { |e| expect(e.message).to eq "error: #{error}, reason: #{reason}, details: #{details}" }
 
       wait_for_callback do |done|
         meteor.get_product(27) do
@@ -406,7 +406,7 @@ describe Metybur do
       error = FFaker::Lorem.word
       reason = FFaker::Lorem.sentence
       details = FFaker::Lorem.paragraph
-      expectation = -> (e) { expect(e.message).to eq "error: #{error}, reason: #{reason}, details: #{details}" }
+      expectation = proc { |e| expect(e.message).to eq "error: #{error}, reason: #{reason}, details: #{details}" }
 
       wait_for_callback do |done|
         meteor.get_product(27) do
