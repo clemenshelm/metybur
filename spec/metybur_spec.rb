@@ -86,17 +86,17 @@ describe Metybur do
   end
 
   context 'ping pong' do
-    it 'responds with pong to a ping' do
+    before :each do
       Metybur.connect(url)
+    end
 
+    it 'responds with pong to a ping' do
       websocket.receive({msg: 'ping'}.to_json)
-
       expect(last_sent_message[:msg]).to eq 'pong'
     end
 
     it 'includes the same id in the pong message' do
       id = FFaker::Guid.guid
-      Metybur.connect(url)
 
       websocket.receive({msg: 'ping', id: id}.to_json)
 
@@ -105,17 +105,15 @@ describe Metybur do
     end
 
     it "doesn't include an id if the ping message contained none" do
-      Metybur.connect(url)
-
       websocket.receive({msg: 'ping'}.to_json)
-
       expect(last_sent_message).not_to have_key :id
     end
   end
 
   context 'logging' do
+    let(:output) { StringIO.new }
+
     it "doesn't log any messages by default" do
-      output = StringIO.new
       Metybur.log_stream = output
       Metybur.connect(url)
 
@@ -125,7 +123,6 @@ describe Metybur do
     end
 
     it 'logs a message when the log level is set to debug' do
-      output = StringIO.new
       Metybur.log_level = :debug
       Metybur.log_stream = output
       Metybur.connect(url)
@@ -150,13 +147,12 @@ describe Metybur do
   end
 
   context 'collections' do
+    let(:collection) { FFaker::Lorem.word }
+    let(:id) { FFaker::Guid.guid }
+    let!(:meteor) { Metybur.connect(url) }
+    let(:fields) { {city: FFaker::Address.city} }
+
     it 'gets notified when a record is added' do
-      collection = FFaker::Internet.user_name
-      id = FFaker::Guid.guid
-      fields = {city: FFaker::Address.city}
-
-      meteor = Metybur.connect(url)
-
       wait_for_callback do |done|
         meteor.collection(collection)
           .on(:added) do |added_id, added_fields|
@@ -176,12 +172,7 @@ describe Metybur do
     end
 
     it 'gets notified when a record is changed' do
-      collection = FFaker::Internet.user_name
-      id = FFaker::Guid.guid
-      fields = {city: FFaker::Address.city}
       cleared = [FFaker::Guid.guid]
-
-      meteor = Metybur.connect(url)
 
       wait_for_callback do |done|
         meteor.collection(collection)
@@ -204,11 +195,6 @@ describe Metybur do
     end
 
     it 'gets notified when a record is removed' do
-      collection = FFaker::Internet.user_name
-      id = FFaker::Guid.guid
-
-      meteor = Metybur.connect(url)
-
       wait_for_callback do |done|
         meteor.collection(collection)
           .on(:removed) do |removed_id|
@@ -226,7 +212,6 @@ describe Metybur do
     end
 
     it 'lets the `on` method be chainable' do
-      meteor = Metybur.connect(url)
       meteor.collection('my-collection')
         .on(:added) { anything }
         .on(:changed) { anything }
@@ -236,12 +221,6 @@ describe Metybur do
     end
 
     it 'registers multiple added callbacks' do
-      collection = FFaker::Internet.user_name
-      id = FFaker::Guid.guid
-      fields = {city: FFaker::Address.city}
-
-      meteor = Metybur.connect(url)
-
       wait_for_callback(calls: 2) do |done|
         meteor.collection(collection)
           .on(:added) { |added_id, added_fields| done.call() }
@@ -258,7 +237,6 @@ describe Metybur do
     end
 
     it "doesn't get notified of a ping message" do
-      meteor = Metybur.connect(url)
       meteor.collection('my-collection')
         .on(:added) { fail('Callback got called') }
 
@@ -266,7 +244,6 @@ describe Metybur do
     end
   
     it "doesn't get notified of a record from another collection" do
-      meteor = Metybur.connect(url)
       meteor.collection('my-collection')
         .on(:added) { fail('Callback got called') }
 
@@ -281,6 +258,8 @@ describe Metybur do
   end
 
   context 'methods' do
+    let!(:meteor) { Metybur.connect(url) }
+
     it 'calls a method through the call method' do
       method = %w(postChatMessage sendEmail submitOrder).sample
       params = %w(35 Vienna true).sample(2)
@@ -288,7 +267,6 @@ describe Metybur do
         .to_a.sample(2)
       params << Hash[hashParams]
 
-      meteor = Metybur.connect(url)
       meteor.call(method, params)
 
       expect(last_sent_message[:msg]).to eq 'method'
@@ -298,7 +276,6 @@ describe Metybur do
     end
 
     it 'calls a method called on the client directly' do
-      meteor = Metybur.connect(url)
       meteor.activate('user', id: 'utrtrvlc')
 
       expect(last_sent_message[:msg]).to eq 'method'
@@ -308,7 +285,6 @@ describe Metybur do
     end
 
     it 'camel-cases methods and parameters called on the client directly' do
-      meteor = Metybur.connect(url)
       meteor.activate_user('Hans', user_id: 'utrtrvlc', is_admin: false)
 
       expect(last_sent_message[:msg]).to eq 'method'
@@ -318,7 +294,6 @@ describe Metybur do
     end
 
     it 'passes the result to a block' do
-      meteor = Metybur.connect(url)
       expectation = proc { |result| expect(result[:price]).to eq 99 }
 
       wait_for_callback do |done|
@@ -337,17 +312,11 @@ describe Metybur do
     end
 
     it "doesn't trigger the callback for ping messages" do
-      meteor = Metybur.connect(url)
-
-      meteor.get_product(27) do
-        fail
-      end
-
+      meteor.get_product(27) { fail }
       websocket.receive({msg: 'ping'}.to_json)
     end
 
     it 'triggers the callback with the right result' do
-      meteor = Metybur.connect(url)
       expectation = proc { |result| expect(result[:price]).to eq 99 }
 
       wait_for_callback do |done|
@@ -371,7 +340,6 @@ describe Metybur do
     end
 
     it 'raises an error if an exception occurs in the method' do
-      meteor = Metybur.connect(url)
       error = FFaker::Lorem.word
       reason = FFaker::Lorem.sentence
       details = FFaker::Lorem.paragraph
@@ -402,7 +370,6 @@ describe Metybur do
     end
 
     it 'raises an error if an exception occurs in the method' do
-      meteor = Metybur.connect(url)
       error = FFaker::Lorem.word
       reason = FFaker::Lorem.sentence
       details = FFaker::Lorem.paragraph
