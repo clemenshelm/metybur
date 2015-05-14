@@ -3,6 +3,7 @@ require 'faye/websocket'
 require 'json'
 require 'logger'
 require_relative 'metybur/client'
+require_relative 'metybur/middleware/logging_middleware'
 
 module Metybur
   CONFIG = {
@@ -15,17 +16,17 @@ module Metybur
     websocket = CONFIG[:websocket_client_class].new(url)
     client = Metybur::Client.new(websocket)
 
-    logger = Logger.new(CONFIG[:log_stream])
-    logger.level = CONFIG[:log_level]
+    logging_middleware = Metybur::LoggingMiddleware.new
+    middleware = [logging_middleware]
+
     websocket.on(:open) do |event|
-      logger.debug 'connection open'
+      middleware.each { |mw| mw.open(event) }
     end
-    websocket.on(:message) do |message|
-      logger.debug "received message #{message.data}"
+    websocket.on(:message) do |event|
+      middleware.each { |mw| mw.message(event) }
     end
     websocket.on(:close) do |event|
-      logger.debug "connection closed (code #{event.code}). #{event.reason}"
-      EM.stop_event_loop
+      middleware.each { |mw| mw.close(event) }
     end
 
     websocket.on(:message) do |event|
