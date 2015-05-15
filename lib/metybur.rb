@@ -4,6 +4,7 @@ require 'json'
 require 'logger'
 require_relative 'metybur/client'
 require_relative 'metybur/middleware/logging_middleware'
+require_relative 'metybur/middleware/json_middleware'
 
 module Metybur
   CONFIG = {
@@ -17,16 +18,18 @@ module Metybur
     client = Metybur::Client.new(websocket)
 
     logging_middleware = Metybur::LoggingMiddleware.new
-    middleware = [logging_middleware]
+    json_middleware = Metybur::JSONMiddleware.new
+    middleware = [logging_middleware, json_middleware]
 
     websocket.on(:open) do |event|
-      middleware.each { |mw| mw.open(event) }
+      middleware.inject(event) { |e, mw| mw.open(e) }
     end
     websocket.on(:message) do |event|
-      middleware.each { |mw| mw.message(event) }
+      middleware.inject(event) { |e, mw| mw.message(e) }
     end
     websocket.on(:close) do |event|
-      middleware.each { |mw| mw.close(event) }
+      middleware.inject(event) { |e, mw| mw.close(e) }
+      EM.stop_event_loop
     end
 
     websocket.on(:message) do |event|

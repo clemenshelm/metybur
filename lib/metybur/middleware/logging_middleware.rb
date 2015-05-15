@@ -6,14 +6,16 @@ class Metybur::LoggingMiddleware
 
   def open(event)
     @logger.debug 'connection open'
+    event
   end
 
   def message(event)
     @logger.debug "received message #{event.data}"
+    event
   end
 
   def close(event)
     @logger.debug "connection closed (code #{event.code}). #{event.reason}"
-    EM.stop_event_loop
+    event
   end
 end
