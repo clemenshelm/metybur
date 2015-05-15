@@ -5,6 +5,7 @@ require 'logger'
 require_relative 'metybur/client'
 require_relative 'metybur/middleware/logging_middleware'
 require_relative 'metybur/middleware/json_middleware'
+require_relative 'metybur/middleware/ping_pong_middleware'
 
 module Metybur
   CONFIG = {
@@ -19,7 +20,8 @@ module Metybur
 
     logging_middleware = Metybur::LoggingMiddleware.new
     json_middleware = Metybur::JSONMiddleware.new
-    middleware = [logging_middleware, json_middleware]
+    ping_pong_middleware = Metybur::PingPongMiddleware.new(websocket)
+    middleware = [logging_middleware, json_middleware, ping_pong_middleware]
 
     websocket.on(:open) do |event|
       middleware.inject(event) { |e, mw| mw.open(e) }
@@ -30,15 +32,6 @@ module Metybur
     websocket.on(:close) do |event|
       middleware.inject(event) { |e, mw| mw.close(e) }
       EM.stop_event_loop
-    end
-
-    websocket.on(:message) do |event|
-      message = JSON.parse(event.data, symbolize_names: true)
-      if message[:msg] == 'ping'
-        pong = {msg: 'pong'}
-        pong[:id] = message[:id] if message[:id]
-        websocket.send(pong.to_json)
-      end
     end
 
     connect_message = {
