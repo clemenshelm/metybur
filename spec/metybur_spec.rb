@@ -236,6 +236,18 @@ describe Metybur do
       end
     end
 
+    it 'does nothing if there is no callback for an event' do
+      meteor.collection(collection)
+      
+      message = {
+        msg: 'added',
+        collection: collection,
+        id: id,
+        fields: fields
+      }.to_json
+      websocket.receive message
+    end
+
     it "doesn't get notified of a ping message" do
       meteor.collection('my-collection')
         .on(:added) { fail('Callback got called') }
