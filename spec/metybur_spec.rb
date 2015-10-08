@@ -126,7 +126,7 @@ describe Metybur do
       Metybur.log_level = :debug
       Metybur.log_stream = output
       Metybur.connect(url)
-      
+
       websocket.receive({msg: 'logged_message'}.to_json)
 
       expect(output.string).not_to be_empty
@@ -143,6 +143,15 @@ describe Metybur do
       expect(last_sent_message[:msg]).to eq 'sub'
       expect(last_sent_message).to have_key :id # we don't care about the value here
       expect(last_sent_message[:name]).to eq record_set
+    end
+
+    it 'should allow you to pass parameters' do
+      record_set = FFaker::Internet.user_name
+      meteor = Metybur.connect(url)
+      meteor.subscribe(record_set, [{lala: 'foo'}])
+      expect(last_sent_message[:msg]).to eq 'sub'
+      expect(last_sent_message).to have_key :params
+      expect(last_sent_message[:params]).to eq [{:lala => 'foo'}]
     end
   end
 
@@ -238,7 +247,7 @@ describe Metybur do
 
     it 'does nothing if there is no callback for an event' do
       meteor.collection(collection)
-      
+
       message = {
         msg: 'added',
         collection: collection,
@@ -254,7 +263,7 @@ describe Metybur do
 
       websocket.receive({msg: 'ping'}.to_json)
     end
-  
+
     it "doesn't get notified of a record from another collection" do
       meteor.collection('my-collection')
         .on(:added) { fail('Callback got called') }

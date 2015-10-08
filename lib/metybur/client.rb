@@ -7,11 +7,12 @@ class Metybur::Client
     @websocket = websocket
   end
 
-  def subscribe(record_set_name)
+  def subscribe(record_set_name, params=[])
     message = {
       msg: 'sub',
       id: 'cde',
-      name: record_set_name
+      name: record_set_name,
+      params: params
     }.to_json
     @websocket.send message
   end
