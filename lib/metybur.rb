@@ -15,7 +15,7 @@ module Metybur
   }
 
   def self.connect(url, credentials = {})
-    websocket = CONFIG[:websocket_client_class].new(url)
+    websocket = CONFIG[:websocket_client_class].new(url, nil, ping: 120)
     client = Metybur::Client.new(websocket)
 
     logging_middleware = Metybur::LoggingMiddleware.new
