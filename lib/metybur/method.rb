@@ -5,8 +5,6 @@ class Metybur::Method
     def initialize(attributes, callback)
       @attributes = attributes
       @callback = callback
-      @logger = Logger.new(Metybur::CONFIG[:log_stream])
-      @logger.level = Metybur::CONFIG[:log_level]
     end
 
     def publish
@@ -38,6 +36,9 @@ class Metybur::Method
       attributes = JSON.parse(event.data, symbolize_names: true)
       handle_message(attributes) if attributes[:msg] == 'result'
     end
+
+    @logger = Logger.new(Metybur::CONFIG[:log_stream])
+    @logger.level = Metybur::CONFIG[:log_level]
   end
 
   def call(params, &block)
@@ -49,6 +50,7 @@ class Metybur::Method
       method: @name,
       params: params
     }.to_json
+    @logger.debug("sending message #{message}")
     @websocket.send message
     @callbacks[id] = block
   end
