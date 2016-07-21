@@ -5,6 +5,8 @@ class Metybur::Method
     def initialize(attributes, callback)
       @attributes = attributes
       @callback = callback
+      @logger = Logger.new(Metybur::CONFIG[:log_stream])
+      @logger.level = Metybur::CONFIG[:log_level]
     end
 
     def publish
@@ -39,6 +41,7 @@ class Metybur::Method
   end
 
   def call(params, &block)
+    @logger.debug("calling method #{@name} with params #{params}")
     id = SecureRandom.uuid
     message = {
       msg: 'method',
