@@ -148,10 +148,10 @@ describe Metybur do
     it 'should allow you to pass parameters' do
       record_set = FFaker::Internet.user_name
       meteor = Metybur.connect(url)
-      meteor.subscribe(record_set, [{lala: 'foo'}])
+      meteor.subscribe(record_set, 'abc', lala: 'foo')
       expect(last_sent_message[:msg]).to eq 'sub'
       expect(last_sent_message).to have_key :params
-      expect(last_sent_message[:params]).to eq [{:lala => 'foo'}]
+      expect(last_sent_message[:params]).to eq ['abc', {:lala => 'foo'}]
     end
   end
 
