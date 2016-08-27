@@ -86,6 +86,12 @@ meteor = Metybur.connect('http://my-meteor-app.org:80/websocket')
 meteor.subscribe('my-chat-messages')
 ```
 
+Subscription arguments can be passed right after the collection name:
+
+```ruby
+meteor.subscribe('my-chat-messages', 10, channel: 'random')
+```
+
 ### Collections
 
 Once you've subscribed, you will receive all records that are already in the record set. The record set contains records from one or more collections. You can process these records as they arrive:
