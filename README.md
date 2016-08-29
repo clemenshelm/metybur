@@ -198,6 +198,15 @@ Metybur.log_level = :debug
 
 Make sure to set the log level before calling `Metybur.connect`, as it won't have any effect afterwards.
 
+
+### Reconnecting
+
+When the websocket connection is lost, Metybur will try to reconnect to your Meteor app.
+After the reconnect the `login` method is called and all your subscriptions are subscribed again.
+
+This means in particular that all documents get sent again and therefore all your
+collections' `added` callbacks will get triggered again.
+
 ## Contributing
 
 1. Fork it ( https://github.com/clemenshelm/metybur/fork )
