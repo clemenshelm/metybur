@@ -3,8 +3,12 @@ require_relative 'collection'
 require_relative 'method'
 
 class Metybur::Client
-  def initialize(websocket)
-    @websocket = websocket
+  attr_writer :websocket
+
+  def initialize(credentials)
+    @credentials = credentials.freeze
+    @subscription_messages = []
+    @collections = []
   end
 
   def subscribe(record_set_name, *params)
@@ -14,11 +18,14 @@ class Metybur::Client
       name: record_set_name,
       params: params
     }.to_json
+    @subscription_messages << message
     @websocket.send message
   end
 
   def collection(name)
-    Metybur::Collection.new(name, @websocket)
+    Metybur::Collection.new(name, @websocket).tap do |collection|
+      @collections << collection
+    end
   end
 
   def method(name)
@@ -41,5 +48,28 @@ class Metybur::Client
       end
     end
     call(method, params, &block)
+  end
+
+  def resubscribe
+    @subscription_messages.each { |message| @websocket.send(message) }
+    @collections.each { |collection| collection.websocket = @websocket }
+  end
+
+  def connect
+    connect_message = {
+      msg: 'connect',
+      version: '1',
+      support: ['1']
+    }
+    @websocket.send(connect_message.to_json)
+
+    credentials = @credentials.dup
+    password = credentials.delete(:password)
+    if password
+      this = self
+      login(user: credentials, password: password) { this.resubscribe }
+    else
+      resubscribe
+    end
   end
 end

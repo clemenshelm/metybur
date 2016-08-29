@@ -35,6 +35,20 @@ describe Metybur do
              support: ['1']
   end
 
+  it 'reconnects to a Meteor URL' do
+    meteor = Metybur.connect(url)
+
+    # Reconnect
+    new_connection = WebsocketMock.new(websocket.url)
+    meteor.websocket = new_connection
+    meteor.connect
+
+    expect(last_sent_message)
+      .to eq msg: 'connect',
+             version: '1',
+             support: ['1']
+  end
+
   context 'logging in' do
     it 'calls the login method with email and password' do
       email = FFaker::Internet.email
@@ -82,6 +96,25 @@ describe Metybur do
       Metybur.connect(url)
 
       expect(last_sent_message[:msg]).to eq 'connect'
+    end
+
+    it "logs in on reconnect" do
+      userid = FFaker::Guid.guid
+      password = FFaker::Internet.password
+
+      meteor = Metybur.connect(url, id: userid, password: password)
+
+      # Reconnect
+      new_connection = WebsocketMock.new(websocket.url)
+      meteor.websocket = new_connection
+      meteor.connect
+
+      expect(last_sent_message[:msg]).to eq 'method'
+      expect(last_sent_message).to have_key :id # we don't care about the value here
+      expect(last_sent_message[:method]).to eq 'login'
+      expect(last_sent_message[:params][0])
+        .to eq user: { id: userid },
+               password: password
     end
   end
 
@@ -149,6 +182,22 @@ describe Metybur do
       record_set = FFaker::Internet.user_name
       meteor = Metybur.connect(url)
       meteor.subscribe(record_set, 'abc', lala: 'foo')
+      expect(last_sent_message[:msg]).to eq 'sub'
+      expect(last_sent_message).to have_key :params
+      expect(last_sent_message[:params]).to eq ['abc', {:lala => 'foo'}]
+    end
+
+    it 'subscribes again on a new connection' do
+      record_set = FFaker::Internet.user_name
+
+      meteor = Metybur.connect(url)
+      meteor.subscribe(record_set, 'abc', lala: 'foo')
+
+      # Reconnect
+      new_connection = WebsocketMock.new(websocket.url)
+      meteor.websocket = new_connection
+      meteor.connect
+
       expect(last_sent_message[:msg]).to eq 'sub'
       expect(last_sent_message).to have_key :params
       expect(last_sent_message[:params]).to eq ['abc', {:lala => 'foo'}]
@@ -275,6 +324,30 @@ describe Metybur do
         fields: {country: 'Belarus'}
       }.to_json
       websocket.receive message
+    end
+
+    it 'still gets notified when a record is added after reconnect' do
+      wait_for_callback do |done|
+        meteor.collection(collection)
+          .on(:added) do |added_id, added_fields|
+            done.call()
+            expect(added_id).to eq id
+            expect(added_fields).to eq fields
+          end
+
+        # reconnect
+        new_connection = WebsocketMock.new(websocket.url)
+        meteor.websocket = new_connection
+        meteor.connect
+
+        message = {
+          msg: 'added',
+          collection: collection,
+          id: id,
+          fields: fields
+        }.to_json
+        new_connection.receive message
+      end
     end
   end
 

@@ -6,7 +6,7 @@ class WebsocketMock
   MessageEvent = Struct.new(:data)
 
   attr_reader :url, :sent
-  
+
   def initialize(url)
     WebsocketMock.instance = self
     @url = url

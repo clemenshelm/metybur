@@ -1,10 +1,14 @@
 class Metybur::Collection
   def initialize(collection_name, websocket)
+    @collection_name = collection_name
     @callbacks = {}
+    self.websocket = websocket
+  end
 
+  def websocket=(websocket)
     websocket.on(:message) do |event|
       attributes = JSON.parse(event.data, symbolize_names: true)
-      handle_message(attributes) if attributes[:collection] == collection_name
+      handle_message(attributes) if attributes[:collection] == @collection_name
     end
   end
 
