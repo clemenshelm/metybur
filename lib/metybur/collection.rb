@@ -6,7 +6,8 @@ class Metybur::Collection
   end
 
   def websocket=(websocket)
-    return if websocket == self.websocket
+    return if websocket == @websocket
+    @websocket = websocket
 
     websocket.on(:message) do |event|
       attributes = JSON.parse(event.data, symbolize_names: true)
